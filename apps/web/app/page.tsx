@@ -1,5 +1,7 @@
 "use client";
+import Header from "@/modules/Header";
 import { useEffect, useState } from "react";
+import styled from "styled-components";
 import { z } from "zod";
 
 type Order = {
@@ -66,49 +68,52 @@ export default function Page() {
   }, []);
 
   return (
-    <main>
-      <h1>Orders</h1>
+    <>
+      <Header />
+      <main>
+        <h1>Ordersss</h1>
 
-      <div style={{ display: "grid", gap: 8, maxWidth: 360 }}>
-        <input
-          placeholder="Item"
-          value={form.item}
-          onChange={(e) => setForm((f) => ({ ...f, item: e.target.value }))}
-        />
-        <input
-          placeholder="Price"
-          value={form.price}
-          onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-        />
-        <select
-          value={form.status}
-          onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
-        >
-          <option>NEW</option>
-          <option>PAID</option>
-          <option>CANCELLED</option>
-        </select>
-        <button onClick={create} disabled={loading}>
-          Create
-        </button>
-        {error && (
-          <p role="alert" style={{ color: "crimson" }}>
-            {error}
-          </p>
+        <div style={{ display: "grid", gap: 8, maxWidth: 360 }}>
+          <input
+            placeholder="Item"
+            value={form.item}
+            onChange={(e) => setForm((f) => ({ ...f, item: e.target.value }))}
+          />
+          <input
+            placeholder="Price"
+            value={form.price}
+            onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+          />
+          <select
+            value={form.status}
+            onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
+          >
+            <option>NEW</option>
+            <option>PAID</option>
+            <option>CANCELLED</option>
+          </select>
+          <button onClick={create} disabled={loading}>
+            Create
+          </button>
+          {error && (
+            <p role="alert" style={{ color: "crimson" }}>
+              {error}
+            </p>
+          )}
+        </div>
+
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <ul style={{ marginTop: 24 }}>
+            {orders.map((o) => (
+              <li key={o.id}>
+                {o.item} – ${o.price} – {o.status}
+              </li>
+            ))}
+          </ul>
         )}
-      </div>
-
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <ul style={{ marginTop: 24 }}>
-          {orders.map((o) => (
-            <li key={o.id}>
-              {o.item} – ${o.price} – {o.status}
-            </li>
-          ))}
-        </ul>
-      )}
-    </main>
+      </main>
+    </>
   );
 }
