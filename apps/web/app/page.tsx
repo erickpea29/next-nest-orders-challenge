@@ -1,15 +1,10 @@
 "use client";
 import Header from "@/modules/Header";
 import { useEffect, useState } from "react";
-import styled from "styled-components";
 import { z } from "zod";
-
-type Order = {
-  id: string;
-  item: string;
-  price: string;
-  status: "NEW" | "PAID" | "CANCELLED";
-};
+import { Order } from "../types/order";
+import { StatCard } from "@/components/ StatCard";
+import { Container } from "@/components/Container";
 
 const schema = z.object({
   item: z.string().min(1),
@@ -70,7 +65,41 @@ export default function Page() {
   return (
     <>
       <Header />
-      <main>
+      <Container>
+        <h1>Orders</h1>
+        <p>Manage your orders efficiently</p>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+            gap: "1.5rem",
+          }}
+        >
+          <StatCard
+            label="New Orders"
+            value="245"
+            trend="+8.2%"
+            trendPositive={true}
+            description="vs last month"
+          />
+          <StatCard
+            label="Paid Orders"
+            value="879"
+            trend="+5.4%"
+            trendPositive={true}
+            description="Successfully processed"
+          />
+          <StatCard
+            label="Cancelled Orders"
+            value="110"
+            trend="-2.1%"
+            trendPositive={false}
+            description="vs last month"
+          />
+        </div>
+      </Container>
+
+      {/* <main>
         <h1>Ordersss</h1>
 
         <div style={{ display: "grid", gap: 8, maxWidth: 360 }}>
@@ -113,7 +142,7 @@ export default function Page() {
             ))}
           </ul>
         )}
-      </main>
+      </main> */}
     </>
   );
 }
