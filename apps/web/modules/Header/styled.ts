@@ -48,42 +48,6 @@ const LogoImage = styled.img`
   }
 `;
 
-const CTAButton = styled.a`
-  background: #fff;
-  color: #000;
-  padding: 0.875rem 2rem;
-  border: 2px solid #000;
-  border-radius: 9999px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  text-decoration: none;
-  display: inline-block;
-
-  &:hover {
-    background: #000;
-    color: #fff;
-    transform: scale(1.02);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-
-  @media (max-width: 768px) {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.875rem;
-  }
-
-  @media (max-width: 480px) {
-    padding: 0.625rem 1.25rem;
-    font-size: 0.8rem;
-  }
-`;
-
 const HeaderSpacer = styled.div`
   height: 88px;
 
@@ -91,11 +55,4 @@ const HeaderSpacer = styled.div`
     height: 72px;
   }
 `;
-export {
-  HeaderContainer,
-  Nav,
-  LogoContainer,
-  LogoImage,
-  CTAButton,
-  HeaderSpacer,
-};
+export { HeaderContainer, Nav, LogoContainer, LogoImage, HeaderSpacer };

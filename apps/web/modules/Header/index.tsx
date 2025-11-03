@@ -1,13 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
 import {
-  CTAButton,
   HeaderContainer,
   HeaderSpacer,
   LogoContainer,
   LogoImage,
   Nav,
 } from "./styled";
+import { Button } from "@/components/Button";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -28,13 +28,9 @@ export default function Header() {
           <LogoContainer>
             <LogoImage src="/images/logo.avif" alt="Logo" />
           </LogoContainer>
-          <CTAButton
-            href="https://github.com/tu-usuario/tu-repo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <Button variant="secondary" size="md">
             Ver en GitHub
-          </CTAButton>
+          </Button>
         </Nav>
       </HeaderContainer>
       <HeaderSpacer />

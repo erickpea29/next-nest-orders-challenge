@@ -7,6 +7,7 @@ import { StatCard } from "@/components/ StatCard";
 import { Container } from "@/components/Container";
 import { Table } from "@/components/Table";
 import { orderColumns } from "./columns";
+import { Button } from "@/components/Button";
 
 const schema = z.object({
   item: z.string().min(1),
@@ -70,8 +71,23 @@ export default function Page() {
     <>
       <Header />
       <Container>
-        <h1>Orders</h1>
-        <p>Manage your orders efficiently</p>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "0.5rem",
+          }}
+        >
+          <div>
+            <h1 style={{ margin: 0 }}>Orders</h1>
+          </div>
+          <Button variant="primary" size="md">
+            Create New Order
+          </Button>
+        </div>
+        <p style={{ marginTop: "0.5rem" }}>Manage your orders efficiently</p>
+
         <div
           style={{
             display: "grid",
