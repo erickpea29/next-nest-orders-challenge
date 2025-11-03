@@ -8,6 +8,7 @@ import { Container } from "@/components/Container";
 import { Table } from "@/components/Table";
 import { orderColumns } from "./columns";
 import { Button } from "@/components/Button";
+import { Drawer } from "@/components/Drawer";
 
 const schema = z.object({
   item: z.string().min(1),
@@ -66,6 +67,7 @@ export default function Page() {
   }, []);
 
   const columns = React.useMemo(() => orderColumns, []);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   return (
     <>
@@ -82,7 +84,11 @@ export default function Page() {
           <div>
             <h1 style={{ margin: 0 }}>Orders</h1>
           </div>
-          <Button variant="primary" size="md">
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => setIsDrawerOpen(true)}
+          >
             Create New Order
           </Button>
         </div>
@@ -119,6 +125,99 @@ export default function Page() {
         </div>
 
         <Table data={orders} columns={columns} initialPageSize={10} />
+        <Drawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          title="Create New Order"
+          size="md"
+          footer={
+            <>
+              <Button variant="ghost" onClick={() => setIsDrawerOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={() => console.log("Save")}>
+                Save Order
+              </Button>
+            </>
+          }
+        >
+          <form>
+            <div style={{ marginBottom: "1rem" }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "0.5rem",
+                  fontWeight: 500,
+                  color: "#475569",
+                }}
+              >
+                Item Name
+              </label>
+              <input
+                type="text"
+                placeholder="Enter item name"
+                style={{
+                  width: "100%",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "6px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: "1rem" }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "0.5rem",
+                  fontWeight: 500,
+                  color: "#475569",
+                }}
+              >
+                Price
+              </label>
+              <input
+                type="number"
+                placeholder="0.00"
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "6px",
+                  fontSize: "0.875rem",
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: "1rem" }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "0.5rem",
+                  fontWeight: 500,
+                  color: "#475569",
+                }}
+              >
+                Status
+              </label>
+              <select
+                style={{
+                  width: "100%",
+                  padding: "0.75rem",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "6px",
+                  fontSize: "0.875rem",
+                }}
+              >
+                <option>NEW</option>
+                <option>PAID</option>
+                <option>CANCELLED</option>
+                <option>SOLD</option>
+                <option>RETURNED</option>
+              </select>
+            </div>
+          </form>
+        </Drawer>
       </Container>
     </>
   );
