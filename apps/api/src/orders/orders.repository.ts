@@ -28,6 +28,10 @@ export class OrdersRepository {
     return this.repo.save(entity);
   }
 
+  async findOne(id: string) {
+    return this.repo.findOneByOrFail({ id });
+  }
+
   async updateStatus(id: string, status: "NEW" | "PAID" | "CANCELLED") {
     await this.repo.update({ id }, { status });
     return this.repo.findOneByOrFail({ id });

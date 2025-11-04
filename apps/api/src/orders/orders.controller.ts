@@ -46,6 +46,11 @@ export class OrdersController {
     );
   }
 
+  @Get(":id")
+  findOne(@Param("id") id: string) {
+    return this.svc.findOne(id);
+  }
+
   @Patch(":id")
   updateStatus(@Param("id") id: string, @Body() body: UpdateStatusDto) {
     return this.svc.updateStatus(id, body.status);

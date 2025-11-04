@@ -33,6 +33,10 @@ export class OrdersService implements OnModuleInit {
     return order;
   }
 
+  async findOne(id: string) {
+    return this.repo.findOne(id);
+  }
+
   async updateStatus(id: string, status: "NEW" | "PAID" | "CANCELLED") {
     return this.repo.updateStatus(id, status);
   }

@@ -30,7 +30,13 @@ async function deleteOrder(id: string): Promise<void> {
 
 type DialogType = "markPaid" | "cancel" | "delete" | null;
 
-function OrderActions({ order }: { order: Order }) {
+function OrderActions({
+  order,
+  onViewDetails,
+}: {
+  order: Order;
+  onViewDetails?: (order: Order) => void;
+}) {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState<DialogType>(null);
 
@@ -103,73 +109,9 @@ function OrderActions({ order }: { order: Order }) {
   };
 
   const handleViewDetails = () => {
-    toast.custom(
-      (t) => (
-        <div
-          style={{
-            background: "#fff",
-            padding: "1rem",
-            borderRadius: "8px",
-            border: "1px solid #e2e8f0",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-            maxWidth: "400px",
-          }}
-        >
-          <div
-            style={{
-              marginBottom: "0.75rem",
-              fontWeight: 600,
-              fontSize: "1rem",
-            }}
-          >
-            Order Details
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.5rem",
-              fontSize: "0.875rem",
-            }}
-          >
-            <div>
-              <strong>Item:</strong> {order.item}
-            </div>
-            <div>
-              <strong>Price:</strong> ${Number(order.price).toFixed(2)}
-            </div>
-            <div>
-              <strong>Status:</strong> {order.status}
-            </div>
-            <div>
-              <strong>Created:</strong>{" "}
-              {new Date(order.createdAt).toLocaleString()}
-            </div>
-            <div>
-              <strong>Updated:</strong>{" "}
-              {new Date(order.updatedAt).toLocaleString()}
-            </div>
-          </div>
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            style={{
-              marginTop: "1rem",
-              width: "100%",
-              padding: "0.5rem",
-              background: "rgb(0, 181, 107)",
-              color: "#fff",
-              border: "none",
-              borderRadius: "6px",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Close
-          </button>
-        </div>
-      ),
-      { duration: Infinity }
-    );
+    if (onViewDetails) {
+      onViewDetails(order);
+    }
   };
 
   const items = [];
@@ -317,7 +259,9 @@ function OrderActions({ order }: { order: Order }) {
   );
 }
 
-export const orderColumns: ColumnDef<Order, any>[] = [
+export const createOrderColumns = (
+  onViewDetails?: (order: Order) => void
+): ColumnDef<Order, any>[] => [
   {
     accessorKey: "item",
     header: "Item",
@@ -370,6 +314,10 @@ export const orderColumns: ColumnDef<Order, any>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => <OrderActions order={row.original} />,
+    cell: ({ row }) => (
+      <OrderActions order={row.original} onViewDetails={onViewDetails} />
+    ),
   },
 ];
+
+export const orderColumns = createOrderColumns();

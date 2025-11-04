@@ -5,11 +5,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Order } from "../types/order";
 import { Container } from "@/components/Container";
 import { Table } from "@/components/Table";
-import { orderColumns } from "./columns";
+import { createOrderColumns } from "./columns";
 import { Button } from "@/components/Button";
 import { Drawer } from "@/components/Drawer";
 import OrderModal from "@/modules/OrderModal";
 import { StatCard } from "@/components/ StatCard";
+import { OrderDetailsModal } from "@/modules/OrderDetailsModal";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -23,6 +24,8 @@ async function fetchOrders(): Promise<Order[]> {
 export default function Page() {
   const queryClient = useQueryClient();
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+  const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const {
     data: orders = [],
@@ -46,7 +49,24 @@ export default function Page() {
     );
   }, [orders]);
 
-  const columns = React.useMemo(() => orderColumns, []);
+  const handleViewDetails = React.useCallback((order: Order) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+
+    window.history.pushState({}, "", `/orders/${order.id}`);
+  }, []);
+
+  const handleCloseModal = React.useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedOrder(null);
+
+    window.history.pushState({}, "", "/");
+  }, []);
+
+  const columns = React.useMemo(
+    () => createOrderColumns(handleViewDetails),
+    [handleViewDetails]
+  );
 
   const handleOrderCreated = () => {
     setIsDrawerOpen(false);
@@ -143,6 +163,12 @@ export default function Page() {
         >
           {orderModal.form}
         </Drawer>
+
+        <OrderDetailsModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          order={selectedOrder}
+        />
       </Container>
     </>
   );

@@ -18,6 +18,7 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
+    "react-hot-toast": "^2.6.0",
     "styled-components": "^6.1.19"
   }
 }
