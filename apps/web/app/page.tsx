@@ -1,6 +1,7 @@
 "use client";
 import Header from "@/modules/Header";
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Order } from "../types/order";
 import { Container } from "@/components/Container";
 import { Table } from "@/components/Table";
@@ -12,35 +13,44 @@ import { StatCard } from "@/components/ StatCard";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
+async function fetchOrders(): Promise<Order[]> {
+  const res = await fetch(`${API}/orders`);
+  if (!res.ok) throw new Error("Failed to fetch orders");
+  const data = await res.json();
+  return data.data;
+}
+
 export default function Page() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [, setLoading] = useState(false);
-  const [, setError] = useState<string | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
 
-  async function load() {
-    setLoading(true);
-    setError(null);
-    try {
-      const r = await fetch(`${API}/orders`);
-      const j = await r.json();
-      setOrders(j.data);
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const {
+    data: orders = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery<Order[]>({
+    queryKey: ["orders"],
+    queryFn: fetchOrders,
+  });
 
-  useEffect(() => {
-    load();
-  }, []);
+  const counts = React.useMemo(() => {
+    return orders.reduce(
+      (acc, order) => {
+        if (order.status === "NEW") acc.new++;
+        else if (order.status === "PAID") acc.paid++;
+        else if (order.status === "CANCELLED") acc.cancelled++;
+        return acc;
+      },
+      { new: 0, paid: 0, cancelled: 0 }
+    );
+  }, [orders]);
 
   const columns = React.useMemo(() => orderColumns, []);
 
   const handleOrderCreated = () => {
     setIsDrawerOpen(false);
-    load();
+    queryClient.invalidateQueries({ queryKey: ["orders"] });
   };
 
   const orderModal = OrderModal({ onSuccess: handleOrderCreated });
@@ -78,28 +88,34 @@ export default function Page() {
         >
           <StatCard
             label="New Orders"
-            value="245"
+            value={counts.new.toString()}
             trend="+8.2%"
             trendPositive={true}
             description="vs last month"
           />
           <StatCard
             label="Paid Orders"
-            value="879"
+            value={counts.paid.toString()}
             trend="+5.4%"
             trendPositive={true}
             description="Successfully processed"
           />
           <StatCard
             label="Cancelled Orders"
-            value="110"
+            value={counts.cancelled.toString()}
             trend="-2.1%"
             trendPositive={false}
             description="vs last month"
           />
         </div>
 
-        <Table data={orders} columns={columns} initialPageSize={10} />
+        {isLoading && <p>Loading orders...</p>}
+        {isError && (
+          <p style={{ color: "red" }}>Error: {(error as Error).message}</p>
+        )}
+        {!isLoading && !isError && (
+          <Table data={orders} columns={columns} initialPageSize={10} />
+        )}
 
         <Drawer
           isOpen={isDrawerOpen}

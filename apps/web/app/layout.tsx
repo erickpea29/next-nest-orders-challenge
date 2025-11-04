@@ -1,4 +1,5 @@
 import StyledComponentsRegistry from "@/lib/registry";
+import Providers from "./providers ";
 
 export default function RootLayout({
   children,
@@ -10,7 +11,9 @@ export default function RootLayout({
       <body
         style={{ fontFamily: "system-ui, sans-serif", margin: 0, padding: 0 }}
       >
-        <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+        <StyledComponentsRegistry>
+          <Providers>{children}</Providers>
+        </StyledComponentsRegistry>
       </body>
     </html>
   );

@@ -10,6 +10,7 @@
     "postinstall": "patch -p0 < patches/app-dir-warning.patch || true"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.6",
     "@tanstack/react-table": "^8.21.3",
     "lucide-react": "^0.552.0",
     "next": "14.2.15",
@@ -19,6 +20,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@tanstack/eslint-plugin-query": "^5.91.2",
     "@types/node": "^20.11.30",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
