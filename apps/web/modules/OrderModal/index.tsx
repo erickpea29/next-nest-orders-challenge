@@ -1,5 +1,6 @@
 import { Input } from "@/components/Input";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { z } from "zod";
 
 const orderSchema = z.object({
@@ -48,6 +49,7 @@ export default function OrderModal({ onSuccess }: OrderModalProps) {
           }
         });
         setErrors(fieldErrors);
+        toast.error("Please fix the validation errors");
         setIsSubmitting(false);
         return;
       }
@@ -67,9 +69,11 @@ export default function OrderModal({ onSuccess }: OrderModalProps) {
       }
 
       setForm({ item: "", price: "", status: "NEW" });
+      toast.success("Order created successfully!");
       onSuccess();
     } catch (error: any) {
       setErrors({ general: error.message || "Failed to create order" });
+      toast.error(error.message || "Failed to create order");
     } finally {
       setIsSubmitting(false);
     }

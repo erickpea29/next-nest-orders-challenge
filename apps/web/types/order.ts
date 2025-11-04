@@ -3,4 +3,6 @@ export type Order = {
   item: string;
   price: string;
   status: "NEW" | "PAID" | "CANCELLED";
+  createdAt: string;
+  updatedAt: string;
 };
