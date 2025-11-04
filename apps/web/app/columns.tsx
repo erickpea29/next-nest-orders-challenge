@@ -301,16 +301,7 @@ export const createOrderColumns = (
       );
     },
   },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
-    cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
-  },
-  {
-    accessorKey: "updatedAt",
-    header: "Updated At",
-    cell: ({ row }) => new Date(row.original.updatedAt).toLocaleDateString(),
-  },
+
   {
     id: "actions",
     header: "Actions",
