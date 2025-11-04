@@ -1,29 +1,22 @@
 "use client";
 import Header from "@/modules/Header";
 import React, { useEffect, useState } from "react";
-import { z } from "zod";
 import { Order } from "../types/order";
-import { StatCard } from "@/components/ StatCard";
 import { Container } from "@/components/Container";
 import { Table } from "@/components/Table";
 import { orderColumns } from "./columns";
 import { Button } from "@/components/Button";
 import { Drawer } from "@/components/Drawer";
-
-const schema = z.object({
-  item: z.string().min(1),
-  price: z.coerce.number().positive(),
-  status: z.enum(["NEW", "PAID", "CANCELLED"]),
-});
+import OrderModal from "@/modules/OrderModal";
+import { StatCard } from "@/components/ StatCard";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const [form, setForm] = useState({ item: "", price: "", status: "NEW" });
+  const [, setLoading] = useState(false);
+  const [, setError] = useState<string | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -39,35 +32,18 @@ export default function Page() {
     }
   }
 
-  async function create() {
-    setError(null);
-    const parsed = schema.safeParse({
-      item: form.item,
-      price: form.price,
-      status: form.status as any,
-    });
-    if (!parsed.success) {
-      setError("Invalid input");
-      return;
-    }
-    await fetch(`${API}/orders`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Idempotency-Key": crypto.randomUUID(),
-      },
-      body: JSON.stringify(parsed.data),
-    });
-    setForm({ item: "", price: "", status: "NEW" });
-    await load();
-  }
-
   useEffect(() => {
     load();
   }, []);
 
   const columns = React.useMemo(() => orderColumns, []);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const handleOrderCreated = () => {
+    setIsDrawerOpen(false);
+    load();
+  };
+
+  const orderModal = OrderModal({ onSuccess: handleOrderCreated });
 
   return (
     <>
@@ -93,7 +69,6 @@ export default function Page() {
           </Button>
         </div>
         <p style={{ marginTop: "0.5rem" }}>Manage your orders efficiently</p>
-
         <div
           style={{
             display: "grid",
@@ -125,6 +100,7 @@ export default function Page() {
         </div>
 
         <Table data={orders} columns={columns} initialPageSize={10} />
+
         <Drawer
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
@@ -132,91 +108,24 @@ export default function Page() {
           size="md"
           footer={
             <>
-              <Button variant="ghost" onClick={() => setIsDrawerOpen(false)}>
+              <Button
+                variant="ghost"
+                onClick={() => setIsDrawerOpen(false)}
+                disabled={orderModal.isSubmitting}
+              >
                 Cancel
               </Button>
-              <Button variant="primary" onClick={() => console.log("Save")}>
+              <Button
+                variant="primary"
+                onClick={orderModal.handleSubmit}
+                loading={orderModal.isSubmitting}
+              >
                 Save Order
               </Button>
             </>
           }
         >
-          <form>
-            <div style={{ marginBottom: "1rem" }}>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "0.5rem",
-                  fontWeight: 500,
-                  color: "#475569",
-                }}
-              >
-                Item Name
-              </label>
-              <input
-                type="text"
-                placeholder="Enter item name"
-                style={{
-                  width: "100%",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "6px",
-                  fontSize: "0.875rem",
-                }}
-              />
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "0.5rem",
-                  fontWeight: 500,
-                  color: "#475569",
-                }}
-              >
-                Price
-              </label>
-              <input
-                type="number"
-                placeholder="0.00"
-                style={{
-                  width: "100%",
-                  padding: "0.75rem",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "6px",
-                  fontSize: "0.875rem",
-                }}
-              />
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "0.5rem",
-                  fontWeight: 500,
-                  color: "#475569",
-                }}
-              >
-                Status
-              </label>
-              <select
-                style={{
-                  width: "100%",
-                  padding: "0.75rem",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "6px",
-                  fontSize: "0.875rem",
-                }}
-              >
-                <option>NEW</option>
-                <option>PAID</option>
-                <option>CANCELLED</option>
-                <option>SOLD</option>
-                <option>RETURNED</option>
-              </select>
-            </div>
-          </form>
+          {orderModal.form}
         </Drawer>
       </Container>
     </>
