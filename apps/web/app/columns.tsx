@@ -28,25 +28,49 @@ export const orderColumns: ColumnDef<Order, any>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }: any) => (
-      <Dropdown
-        items={[
+    cell: ({ row }: any) => {
+      const order = row.original;
+      const items = [];
+
+      items.push({
+        label: "View Details",
+        onClick: () => console.log("View Details:", order),
+      });
+
+      if (order.status === "NEW") {
+        items.push(
           {
-            label: "View Details",
-            onClick: () => console.log("View", row.original),
-          },
-          {
-            label: "Edit Order",
-            onClick: () => console.log("Edit", row.original),
+            label: "Mark as Paid",
+            onClick: () => console.log("Mark as Paid:", order.id, order),
           },
           {
             label: "Cancel Order",
-            onClick: () => console.log("Cancel", row.original),
+            onClick: () => console.log("Cancel Order:", order.id, order),
             variant: "danger",
             divider: true,
-          },
-        ]}
-      />
-    ),
+          }
+        );
+      }
+
+      if (order.status === "PAID") {
+        items.push({
+          label: "Refund (Cancel)",
+          onClick: () => console.log("Refund/Cancel:", order.id, order),
+          variant: "danger",
+          divider: true,
+        });
+      }
+
+      if (order.status === "CANCELLED") {
+        items.push({
+          label: "Delete Order",
+          onClick: () => console.log("Delete Order:", order.id, order),
+          variant: "danger",
+          divider: true,
+        });
+      }
+
+      return <Dropdown items={items} />;
+    },
   },
 ];

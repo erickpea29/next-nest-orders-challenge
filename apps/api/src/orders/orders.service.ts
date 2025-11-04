@@ -1,9 +1,8 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { OrdersRepository } from './orders.repository';
-import { AppDataSource } from '../data-source';
+import { Injectable, OnModuleInit } from "@nestjs/common";
+import { OrdersRepository } from "./orders.repository";
+import { AppDataSource } from "../data-source";
 
-// naive in-memory idempotency store for the challenge
-const idem = new Map<string, string>(); // key -> orderId
+const idem = new Map<string, string>();
 
 @Injectable()
 export class OrdersService implements OnModuleInit {
@@ -19,12 +18,14 @@ export class OrdersService implements OnModuleInit {
     return this.repo.list(page, size, q);
   }
 
-  async create(dto: { item: string; price: number; status: 'NEW' | 'PAID' | 'CANCELLED' }, idemKey?: string) {
+  async create(
+    dto: { item: string; price: number; status: "NEW" | "PAID" | "CANCELLED" },
+    idemKey?: string
+  ) {
     if (idemKey && idem.has(idemKey)) {
       const id = idem.get(idemKey)!;
-      // return existing order
       const { data } = await this.repo.list(1, 1);
-      const existing = data.find(o => o.id === id);
+      const existing = data.find((o) => o.id === id);
       if (existing) return existing;
     }
     const order = await this.repo.create(dto);
@@ -32,7 +33,17 @@ export class OrdersService implements OnModuleInit {
     return order;
   }
 
-  async updateStatus(id: string, status: 'NEW' | 'PAID' | 'CANCELLED') {
+  async updateStatus(id: string, status: "NEW" | "PAID" | "CANCELLED") {
     return this.repo.updateStatus(id, status);
+  }
+
+  async delete(id: string) {
+    for (const [key, orderId] of idem.entries()) {
+      if (orderId === id) {
+        idem.delete(key);
+        break;
+      }
+    }
+    return this.repo.delete(id);
   }
 }
