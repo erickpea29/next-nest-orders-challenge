@@ -1,12 +1,22 @@
-name: ci
+name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
   pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-test:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,16 +26,117 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run lint
-      - run: npm run build
-      - run: npm test
 
-  docker-build:
+  unit-tests:
+    name: Unit Tests (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
-    needs: build-test
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
+
+      - name: Run API tests
+        run: npm test -- --coverage --ci --maxWorkers=2
+        working-directory: apps/api
+
+      - name: Verify coverage thresholds
+        run: |
+          if [ -f apps/api/coverage/coverage-summary.json ]; then
+            node -e "
+              const coverage = require('./apps/api/coverage/coverage-summary.json');
+              const total = coverage.total;
+              const threshold = 70;
+              let failed = false;
+              ['lines', 'statements', 'functions', 'branches'].forEach(metric => {
+                const pct = total[metric].pct;
+                console.log(\`\${metric.padEnd(12)}: \${pct}%\`);
+                if (pct < threshold) {
+                  console.error(\`❌ \${metric} coverage \${pct}% is below threshold \${threshold}%\`);
+                  failed = true;
+                }
+              });
+              if (failed) process.exit(1);
+              else console.log('\\n✅ All coverage thresholds met!');
+            "
+          else
+            echo "❌ Coverage summary not found" && exit 1
+          fi
+
+      - name: Upload coverage to Codecov
+        if: matrix.node-version == '20.x'
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./apps/api/coverage/lcov.info
+          flags: unittests
+          name: api-coverage
+          fail_ci_if_error: false
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request' && matrix.node-version == '20.x'
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        with:
+          lcov-file: ./apps/api/coverage/lcov.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          delete-old-comments: true
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint, unit-tests]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+
+      - name: Upload API build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-dist
+          path: apps/api/dist
+          retention-days: 1
+
+      - name: Upload Web build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/.next
+          retention-days: 1
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
+
       - name: Build API image
-        run: docker build -f apps/api/Dockerfile -t api:local .
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          tags: api:${{ github.sha }},api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: false
+
       - name: Build Web image
-        run: docker build -f apps/web/Dockerfile -t web:local .
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          tags: web:${{ github.sha }},web:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: false

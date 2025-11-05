@@ -1,0 +1,124 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/**'
+      - '.github/workflows/e2e.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'apps/**'
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e-mocked:
+    name: E2E (Mocked API)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+
+      - name: Build Web app
+        working-directory: apps/web
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+
+      - name: Start Web server
+        working-directory: apps/web
+        run: npm start &
+        env:
+          PORT: 3000
+
+      - name: Wait for server
+        run: npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          install: false
+          browser: chrome
+          working-directory: apps/web
+          config-file: cypress.config.ts
+          spec: cypress/e2e/**/*.cy.ts
+        env:
+          CYPRESS_BASE_URL: http://localhost:3000
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots-mocked
+          path: apps/web/cypress/screenshots
+          if-no-files-found: ignore
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos-mocked
+          path: apps/web/cypress/videos
+          if-no-files-found: ignore
+
+  e2e-real:
+    name: E2E (Real API)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+
+      - name: Build apps
+        run: npm run build
+
+      - name: Start API server
+        working-directory: apps/api
+        run: npm start &
+        env:
+          PORT: 3001
+
+      - name: Start Web server
+        working-directory: apps/web
+        run: npm start &
+        env:
+          PORT: 3000
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+
+      - name: Wait for servers
+        run: npx wait-on http://localhost:3001 http://localhost:3000 --timeout 60000
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          install: false
+          browser: chrome
+          config-file: apps/web/cypress.config.ts
+          spec: apps/web/cypress/e2e/**/*.cy.ts
+        env:
+          CYPRESS_BASE_URL: http://localhost:3000
+          CYPRESS_API_URL: http://localhost:3001
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots-real
+          path: apps/web/cypress/screenshots
+          if-no-files-found: ignore
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos-real
+          path: apps/web/cypress/videos
+          if-no-files-found: ignore
