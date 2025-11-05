@@ -263,6 +263,10 @@ export const createOrderColumns = (
   onViewDetails?: (order: Order) => void
 ): ColumnDef<Order, any>[] => [
   {
+    accessorKey: "",
+    header: ".",
+  },
+  {
     accessorKey: "item",
     header: "Item",
   },

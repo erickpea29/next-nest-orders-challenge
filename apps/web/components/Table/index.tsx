@@ -5,6 +5,7 @@ import {
   PageSizeSelect,
   PaginationButton,
   PaginationControls,
+  PaginationGroup,
   PaginationWrapper,
   RowCount,
   StyledTable,
@@ -104,68 +105,72 @@ export function Table<T>({
       </StyledTable>
       <PaginationWrapper>
         <PaginationControls>
-          <PaginationButton
-            onClick={() => table.firstPage()}
-            disabled={!table.getCanPreviousPage()}
-            aria-label="Go to first page"
-          >
-            {"<<"}
-          </PaginationButton>
-          <PaginationButton
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            aria-label="Go to previous page"
-          >
-            {"<"}
-          </PaginationButton>
-          <PaginationButton
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            aria-label="Go to next page"
-          >
-            {">"}
-          </PaginationButton>
-          <PaginationButton
-            onClick={() => table.lastPage()}
-            disabled={!table.getCanNextPage()}
-            aria-label="Go to last page"
-          >
-            {">>"}
-          </PaginationButton>
-          <PageInfo>
-            <div>Page</div>
-            <strong>
-              {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount().toLocaleString()}
-            </strong>
-          </PageInfo>
-          <PageInfo>
-            | Go to page:
-            <PageInput
-              type="number"
-              min="1"
-              max={table.getPageCount()}
-              defaultValue={table.getState().pagination.pageIndex + 1}
+          <PaginationGroup>
+            <PaginationButton
+              onClick={() => table.firstPage()}
+              disabled={!table.getCanPreviousPage()}
+              aria-label="Go to first page"
+            >
+              {"<<"}
+            </PaginationButton>
+            <PaginationButton
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              aria-label="Go to previous page"
+            >
+              {"<"}
+            </PaginationButton>
+            <PaginationButton
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              aria-label="Go to next page"
+            >
+              {">"}
+            </PaginationButton>
+            <PaginationButton
+              onClick={() => table.lastPage()}
+              disabled={!table.getCanNextPage()}
+              aria-label="Go to last page"
+            >
+              {">>"}
+            </PaginationButton>
+            <PageInfo>
+              <div>Page</div>
+              <strong>
+                {table.getState().pagination.pageIndex + 1} of{" "}
+                {table.getPageCount().toLocaleString()}
+              </strong>
+            </PageInfo>
+          </PaginationGroup>
+          <PaginationGroup>
+            <PageInfo>
+              Go to page:
+              <PageInput
+                type="number"
+                min="1"
+                max={table.getPageCount()}
+                defaultValue={table.getState().pagination.pageIndex + 1}
+                onChange={(e) => {
+                  const page = e.target.value ? Number(e.target.value) - 1 : 0;
+                  table.setPageIndex(page);
+                }}
+                aria-label="Jump to page number"
+              />
+            </PageInfo>
+            <PageSizeSelect
+              value={table.getState().pagination.pageSize}
               onChange={(e) => {
-                const page = e.target.value ? Number(e.target.value) - 1 : 0;
-                table.setPageIndex(page);
+                table.setPageSize(Number(e.target.value));
               }}
-              aria-label="Jump to page number"
-            />
-          </PageInfo>
-          <PageSizeSelect
-            value={table.getState().pagination.pageSize}
-            onChange={(e) => {
-              table.setPageSize(Number(e.target.value));
-            }}
-            aria-label="Select number of rows per page"
-          >
-            {[10, 20, 30, 40, 50].map((pageSize) => (
-              <option key={pageSize} value={pageSize}>
-                Show {pageSize}
-              </option>
-            ))}
-          </PageSizeSelect>
+              aria-label="Select number of rows per page"
+            >
+              {[10, 20, 30, 40, 50].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  Show {pageSize}
+                </option>
+              ))}
+            </PageSizeSelect>
+          </PaginationGroup>
         </PaginationControls>
       </PaginationWrapper>
 

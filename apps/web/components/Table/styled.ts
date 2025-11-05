@@ -18,6 +18,24 @@ const TableWrapper = styled.div`
     border-left: none;
     border-right: none;
   }
+
+  /* Scrollbar styling for better mobile UX */
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
 `;
 
 const StyledTable = styled.table`
@@ -28,7 +46,13 @@ const StyledTable = styled.table`
   min-width: 600px;
 
   @media (max-width: 768px) {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
+    min-width: 500px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.6875rem;
+    min-width: 450px;
   }
 `;
 
@@ -67,6 +91,7 @@ const Th = styled.th`
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
 
   &:first-child {
     padding-left: 1.5rem;
@@ -76,17 +101,23 @@ const Th = styled.th`
     padding-right: 1.5rem;
   }
 
-  @media (max-width: 640px) {
-    padding: 0.625rem 0.75rem;
-    font-size: 0.6875rem;
+  @media (max-width: 768px) {
+    padding: 0.625rem 0.5rem;
+    font-size: 0.625rem;
 
     &:first-child {
-      padding-left: 1rem;
+      padding-left: 0.75rem;
     }
 
     &:last-child {
-      padding-right: 1rem;
+      padding-right: 0.75rem;
     }
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.5rem 0.375rem;
+    font-size: 0.5625rem;
+    letter-spacing: 0.025em;
   }
 `;
 
@@ -103,16 +134,22 @@ const Td = styled.td`
     padding-right: 1.5rem;
   }
 
-  @media (max-width: 640px) {
-    padding: 0.75rem 0.75rem;
+  @media (max-width: 768px) {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.75rem;
 
     &:first-child {
-      padding-left: 1rem;
+      padding-left: 0.75rem;
     }
 
     &:last-child {
-      padding-right: 1rem;
+      padding-right: 0.75rem;
     }
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.625rem 0.375rem;
+    font-size: 0.6875rem;
   }
 `;
 
@@ -140,26 +177,51 @@ const RerenderButton = styled.button`
 `;
 
 const PaginationWrapper = styled.div`
-  padding: 1rem 0rem;
+  padding: 1rem 1.5rem;
   border-top: 1px solid rgb(242, 244, 247);
   background: #fff;
 
   @media (max-width: 768px) {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    padding: 0.75rem 1rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.75rem;
   }
 `;
 
 const PaginationControls = styled.div`
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+
+    > div {
+      justify-content: center;
+    }
+  }
+`;
+
+const PaginationGroup = styled.div`
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
 
   @media (max-width: 640px) {
-    gap: 0.375rem;
-    font-size: 0.8125rem;
+    justify-content: center;
+    width: 100%;
   }
 `;
 
@@ -174,6 +236,7 @@ const PaginationButton = styled.button`
   transition: all 0.15s ease;
   min-width: 44px;
   min-height: 44px;
+  flex-shrink: 0;
 
   &:hover:not(:disabled) {
     background: #f8fafc;
@@ -189,11 +252,18 @@ const PaginationButton = styled.button`
     transform: scale(0.98);
   }
 
-  @media (max-width: 640px) {
-    padding: 0.375rem 0.5rem;
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.625rem;
+    min-width: 42px;
+    min-height: 42px;
+    font-size: 0.8125rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.5rem;
     min-width: 40px;
     min-height: 40px;
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -204,19 +274,29 @@ const PaginationButton = styled.button`
 const PageInfo = styled.span`
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.375rem;
   font-size: 0.875rem;
   color: #475569;
-  margin-left: 0.5rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 
   strong {
     color: #0f172a;
     font-weight: 600;
   }
 
+  @media (max-width: 768px) {
+    font-size: 0.8125rem;
+    gap: 0.25rem;
+  }
+
   @media (max-width: 640px) {
     font-size: 0.8125rem;
-    margin-left: 0.25rem;
+    justify-content: center;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.75rem;
   }
 `;
 
@@ -228,6 +308,7 @@ const PageInput = styled.input`
   font-size: 0.875rem;
   text-align: center;
   transition: border-color 0.15s ease;
+  flex-shrink: 0;
 
   &:focus {
     outline: none;
@@ -235,10 +316,20 @@ const PageInput = styled.input`
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     width: 3.5rem;
-    padding: 0.375rem;
     font-size: 0.8125rem;
+  }
+
+  @media (max-width: 640px) {
+    width: 100%;
+    max-width: 5rem;
+    padding: 0.625rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.75rem;
+    padding: 0.5rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -255,6 +346,7 @@ const PageSizeSelect = styled.select`
   color: #475569;
   cursor: pointer;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 
   &:hover {
     border-color: #cbd5e1;
@@ -266,9 +358,19 @@ const PageSizeSelect = styled.select`
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
-  @media (max-width: 640px) {
-    padding: 0.375rem 0.5rem;
+  @media (max-width: 768px) {
     font-size: 0.8125rem;
+  }
+
+  @media (max-width: 640px) {
+    padding: 0.625rem 0.75rem;
+    width: 100%;
+    font-size: 0.875rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.5rem 0.625rem;
+    font-size: 0.75rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -284,9 +386,18 @@ const RowCount = styled.div`
   border-top: 1px solid rgb(242, 244, 247);
   text-align: right;
 
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     padding: 0.5rem 1rem;
     font-size: 0.75rem;
+  }
+
+  @media (max-width: 640px) {
+    text-align: center;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.6875rem;
   }
 `;
 
@@ -301,6 +412,7 @@ export {
   RerenderButton,
   PaginationWrapper,
   PaginationControls,
+  PaginationGroup,
   PaginationButton,
   PageInfo,
   PageInput,
