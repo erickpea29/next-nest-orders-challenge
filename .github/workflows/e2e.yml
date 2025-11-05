@@ -22,21 +22,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - run: npm ci
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Cypress dependencies
+        working-directory: apps/web
+        run: |
+          echo "Checking for cypress-mochawesome-reporter..."
+          if [ ! -d "node_modules/cypress-mochawesome-reporter" ]; then
+            echo "Installing cypress-mochawesome-reporter..."
+            npm install
+          fi
 
       - name: Build Web app
-        working-directory: apps/web
-        run: npm run build
+        run: npm run build --workspace=apps/web
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3001
 
       - name: Start Web server
-        working-directory: apps/web
-        run: npm start &
+        run: |
+          cd apps/web
+          npm start &
+          echo $! > /tmp/web_server.pid
         env:
           PORT: 3000
 
@@ -44,15 +57,17 @@ jobs:
         run: npx wait-on http://localhost:3000 --timeout 60000
 
       - name: Run Cypress tests
-        uses: cypress-io/github-action@v6
-        with:
-          install: false
-          browser: chrome
-          working-directory: apps/web
-          config-file: cypress.config.ts
-          spec: cypress/e2e/**/*.cy.ts
+        working-directory: apps/web
+        run: npx cypress run --browser chrome --config-file cypress.config.ts --spec "cypress/e2e/**/*.cy.ts"
         env:
           CYPRESS_BASE_URL: http://localhost:3000
+
+      - name: Stop servers
+        if: always()
+        run: |
+          if [ -f /tmp/web_server.pid ]; then
+            kill $(cat /tmp/web_server.pid) || true
+          fi
 
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -73,41 +88,66 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - run: npm ci
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Cypress dependencies
+        working-directory: apps/web
+        run: |
+          echo "Checking for cypress-mochawesome-reporter..."
+          if [ ! -d "node_modules/cypress-mochawesome-reporter" ]; then
+            echo "Installing cypress-mochawesome-reporter..."
+            npm install
+          fi
 
       - name: Build apps
         run: npm run build
 
       - name: Start API server
-        working-directory: apps/api
-        run: npm start &
+        run: |
+          cd apps/api
+          npm start &
+          echo $! > /tmp/api_server.pid
         env:
           PORT: 3001
 
+      - name: Wait for API
+        run: npx wait-on http://localhost:3001/health --timeout 60000 || npx wait-on http://localhost:3001 --timeout 30000
+
       - name: Start Web server
-        working-directory: apps/web
-        run: npm start &
+        run: |
+          cd apps/web
+          npm start &
+          echo $! > /tmp/web_server.pid
         env:
           PORT: 3000
           NEXT_PUBLIC_API_URL: http://localhost:3001
 
-      - name: Wait for servers
-        run: npx wait-on http://localhost:3001 http://localhost:3000 --timeout 60000
+      - name: Wait for Web
+        run: npx wait-on http://localhost:3000 --timeout 60000
 
       - name: Run Cypress tests
-        uses: cypress-io/github-action@v6
-        with:
-          install: false
-          browser: chrome
-          config-file: apps/web/cypress.config.ts
-          spec: apps/web/cypress/e2e/**/*.cy.ts
+        working-directory: apps/web
+        run: npx cypress run --browser chrome --config-file cypress.config.ts --spec "cypress/e2e/**/*.cy.ts"
         env:
           CYPRESS_BASE_URL: http://localhost:3000
           CYPRESS_API_URL: http://localhost:3001
+
+      - name: Stop servers
+        if: always()
+        run: |
+          if [ -f /tmp/api_server.pid ]; then
+            kill $(cat /tmp/api_server.pid) || true
+          fi
+          if [ -f /tmp/web_server.pid ]; then
+            kill $(cat /tmp/web_server.pid) || true
+          fi
 
       - uses: actions/upload-artifact@v4
         if: failure()
