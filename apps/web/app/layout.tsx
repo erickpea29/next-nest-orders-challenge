@@ -41,20 +41,11 @@ export const metadata: Metadata = {
     ],
   },
 
-  twitter: {
-    card: "summary_large_image",
-    title: "Orders Management System",
-    description: "Efficient order management dashboard for tracking orders",
-    images: ["/images/twitter-image.jpg"],
-    creator: "@yourhandle",
-  },
-
   icons: {
     icon: [
       { url: "/favicon.ico" },
       { url: "/icon.png", type: "image/png", sizes: "32x32" },
     ],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
   },
 
   robots: {
