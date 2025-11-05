@@ -22,6 +22,7 @@ import {
   ErrorMessage,
 } from "./styled";
 import { TableSkeleton } from "@/components/Skeleton";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -37,6 +38,7 @@ export default function Page() {
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const isMobile = useIsMobile();
 
   const {
     data: orders = [],
@@ -98,7 +100,7 @@ export default function Page() {
               <PageTitle>Orders</PageTitle>
               <Button
                 variant="primary"
-                size="md"
+                size={isMobile ? "sm" : "md"}
                 onClick={() => setIsDrawerOpen(true)}
               >
                 Create New Order
@@ -144,7 +146,7 @@ export default function Page() {
               </ErrorMessage>
             )}
             {!isLoading && !isError && (
-              <Table data={orders} columns={columns} initialPageSize={10} />
+              <Table data={orders} columns={columns} />
             )}
           </Section>
 

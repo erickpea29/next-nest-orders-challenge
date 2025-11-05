@@ -4,11 +4,12 @@ const TableWrapper = styled.div`
   background: #fff;
   border: 1px solid rgba(255, 255, 255, 1);
   border-radius: 8px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
-  margin-top: 2rem;
+  margin-top: 0rem;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 400px);
 
   @media (max-width: 768px) {
     margin-left: -1.5rem;
@@ -17,10 +18,24 @@ const TableWrapper = styled.div`
     border-radius: 0;
     border-left: none;
     border-right: none;
+    max-height: calc(100vh - 450px);
   }
 
-  /* Scrollbar styling for better mobile UX */
+  @media (max-width: 480px) {
+    max-height: calc(100vh - 500px);
+  }
+`;
+
+const TableScrollContainer = styled.div`
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;
+
+  /* Scrollbar styling */
   &::-webkit-scrollbar {
+    width: 8px;
     height: 8px;
   }
 
@@ -403,6 +418,7 @@ const RowCount = styled.div`
 
 export {
   TableWrapper,
+  TableScrollContainer,
   StyledTable,
   Thead,
   Tbody,

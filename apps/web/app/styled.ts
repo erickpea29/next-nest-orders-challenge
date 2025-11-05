@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const PageHeader = styled.header`
   margin-bottom: 2rem;
@@ -62,7 +62,6 @@ export const StatsGrid = styled.div`
 `;
 
 export const Section = styled.section`
-  margin-top: 2rem;
   width: 100%;
   box-sizing: border-box;
   overflow-x: hidden;

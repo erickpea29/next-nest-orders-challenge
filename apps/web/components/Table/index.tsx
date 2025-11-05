@@ -9,6 +9,7 @@ import {
   PaginationWrapper,
   RowCount,
   StyledTable,
+  TableScrollContainer,
   TableWrapper,
   Tbody,
   Td,
@@ -35,12 +36,13 @@ interface TableProps<T> {
 export function Table<T>({
   data,
   columns,
-  initialPageSize = 10,
+  initialPageSize = 5,
 }: TableProps<T>) {
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
     pageSize: initialPageSize,
   });
+  const [pageInputValue, setPageInputValue] = React.useState("1");
 
   const table = useReactTable({
     columns,
@@ -56,53 +58,59 @@ export function Table<T>({
     },
   });
 
+  React.useEffect(() => {
+    setPageInputValue(String(table.getState().pagination.pageIndex + 1));
+  }, [table.getState().pagination.pageIndex]);
+
   return (
     <TableWrapper>
-      <StyledTable>
-        <caption
-          style={{
-            position: "absolute",
-            width: "1px",
-            height: "1px",
-            padding: 0,
-            margin: "-1px",
-            overflow: "hidden",
-            clip: "rect(0,0,0,0)",
-            whiteSpace: "nowrap",
-            borderWidth: 0,
-          }}
-        >
-          Orders list showing {table.getRowCount()} total orders
-        </caption>
+      <TableScrollContainer>
+        <StyledTable>
+          <caption
+            style={{
+              position: "absolute",
+              width: "1px",
+              height: "1px",
+              padding: 0,
+              margin: "-1px",
+              overflow: "hidden",
+              clip: "rect(0,0,0,0)",
+              whiteSpace: "nowrap",
+              borderWidth: 0,
+            }}
+          >
+            Orders list showing {table.getRowCount()} total orders
+          </caption>
 
-        <Thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <Th key={header.id} scope="col">
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </Th>
-              ))}
-            </tr>
-          ))}
-        </Thead>
-        <Tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <Td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </Td>
-              ))}
-            </tr>
-          ))}
-        </Tbody>
-      </StyledTable>
+          <Thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <Th key={header.id} scope="col">
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </Th>
+                ))}
+              </tr>
+            ))}
+          </Thead>
+          <Tbody>
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <Td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </Td>
+                ))}
+              </tr>
+            ))}
+          </Tbody>
+        </StyledTable>
+      </TableScrollContainer>
       <PaginationWrapper>
         <PaginationControls>
           <PaginationGroup>
@@ -149,10 +157,25 @@ export function Table<T>({
                 type="number"
                 min="1"
                 max={table.getPageCount()}
-                defaultValue={table.getState().pagination.pageIndex + 1}
+                value={pageInputValue}
                 onChange={(e) => {
+                  setPageInputValue(e.target.value);
+                }}
+                onBlur={(e) => {
                   const page = e.target.value ? Number(e.target.value) - 1 : 0;
-                  table.setPageIndex(page);
+                  const maxPage = table.getPageCount() - 1;
+                  const validPage = Math.max(0, Math.min(page, maxPage));
+                  table.setPageIndex(validPage);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const page = e.currentTarget.value
+                      ? Number(e.currentTarget.value) - 1
+                      : 0;
+                    const maxPage = table.getPageCount() - 1;
+                    const validPage = Math.max(0, Math.min(page, maxPage));
+                    table.setPageIndex(validPage);
+                  }
                 }}
                 aria-label="Jump to page number"
               />
@@ -164,7 +187,7 @@ export function Table<T>({
               }}
               aria-label="Select number of rows per page"
             >
-              {[10, 20, 30, 40, 50].map((pageSize) => (
+              {[5, 10, 15, 20, 25].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
                   Show {pageSize}
                 </option>
