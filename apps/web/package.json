@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start -p 3000",
     "lint": "eslint . || true",
+    "test": "echo \"No unit tests configured for web workspace. E2E tests available via test:e2e\"",
     "postinstall": "patch -p0 < patches/app-dir-warning.patch || true",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
