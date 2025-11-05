@@ -1,26 +1,17 @@
-# ============================================
-# DEVELOPMENT STAGE
-# ============================================
 FROM node:20-alpine AS development
 WORKDIR /app
 
-# Copiar archivos de configuración raíz
 COPY package.json package-lock.json* .npmrc* ./
 COPY tsconfig.base.json ./
 COPY apps/api/package.json apps/api/package.json
 
-# Instalar dependencias
 RUN npm ci
 
-# El código se montará via volume
 WORKDIR /app/apps/api
 
 EXPOSE 3001
 CMD ["npm", "run", "start:dev"]
 
-# ============================================
-# BUILD STAGE (para producción)
-# ============================================
 FROM node:20-alpine AS build
 WORKDIR /app
 
@@ -35,9 +26,7 @@ COPY apps/api ./apps/api
 WORKDIR /app/apps/api
 RUN npx nest build
 
-# ============================================
-# RUNTIME STAGE (producción)
-# ============================================
+
 FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
