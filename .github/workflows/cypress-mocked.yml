@@ -1,21 +1,18 @@
 name: Cypress E2E Tests (Mocked API)
 
-# This workflow runs Cypress tests with mocked API responses
-# Faster execution, suitable for quick feedback on frontend changes
-
 on:
   push:
     branches:
       - main
       - develop
     paths:
-      - 'apps/web/**'
+      - "apps/web/**"
   pull_request:
     branches:
       - main
       - develop
     paths:
-      - 'apps/web/**'
+      - "apps/web/**"
   workflow_dispatch:
 
 jobs:
@@ -30,8 +27,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -54,11 +51,11 @@ jobs:
       - name: Run Cypress tests (mocked)
         uses: cypress-io/github-action@v6
         with:
-          working-directory: apps/web
           install: false
           browser: chrome
           headed: false
-          spec: cypress/e2e/**/*.cy.ts
+          config-file: apps/web/cypress.config.ts
+          spec: apps/web/cypress/e2e/**/*.cy.ts
         env:
           CYPRESS_BASE_URL: http://localhost:3000
 
