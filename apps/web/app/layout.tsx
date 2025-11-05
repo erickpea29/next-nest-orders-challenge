@@ -1,5 +1,5 @@
 import StyledComponentsRegistry from "@/lib/registry";
-import Providers from "./providers ";
+import Providers from "./providers";
 
 export default function RootLayout({
   children,

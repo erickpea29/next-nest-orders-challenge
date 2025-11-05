@@ -7,7 +7,17 @@
     "build": "next build",
     "start": "next start -p 3000",
     "lint": "eslint . || true",
-    "postinstall": "patch -p0 < patches/app-dir-warning.patch || true"
+    "postinstall": "patch -p0 < patches/app-dir-warning.patch || true",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:run:headed": "cypress run --headed --browser chrome",
+    "cypress:run:chrome": "cypress run --browser chrome",
+    "cypress:run:firefox": "cypress run --browser firefox",
+    "cypress:run:edge": "cypress run --browser edge",
+    "test:e2e": "cypress run",
+    "test:e2e:headed": "cypress run --headed",
+    "test:e2e:chrome": "cypress run --browser chrome --headed",
+    "test:e2e:report": "cypress run && npx marge cypress/results/*.json -f report -o cypress/reports/html"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.6",
@@ -21,11 +31,17 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@cypress/webpack-dev-server": "^5.1.4",
     "@tanstack/eslint-plugin-query": "^5.91.2",
     "@types/node": "^20.11.30",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
+    "cypress": "^15.5.0",
+    "cypress-mochawesome-reporter": "^4.0.2",
     "eslint": "^9.12.0",
+    "mochawesome": "^7.1.4",
+    "mochawesome-merge": "^5.0.0",
+    "mochawesome-report-generator": "^6.3.0",
     "typescript": "^5.6.3"
   }
 }

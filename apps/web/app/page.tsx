@@ -9,7 +9,7 @@ import { createOrderColumns } from "./columns";
 import { Button } from "@/components/Button";
 import { Drawer } from "@/components/Drawer";
 import OrderModal from "@/modules/OrderModal";
-import { StatCard } from "@/components/ StatCard";
+import { StatCard } from "@/components/StatCard";
 import { OrderDetailsModal } from "@/modules/OrderDetailsModal";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";

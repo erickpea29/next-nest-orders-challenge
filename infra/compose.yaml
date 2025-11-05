@@ -28,12 +28,11 @@ services:
     ports:
       - "3001:3001"
     volumes:
-      # Monta todo el monorepo
       - ../:/app
-      # Evita sobrescribir node_modules
+
       - /app/node_modules
       - /app/apps/api/node_modules
-      # Evita sobrescribir dist durante desarrollo
+
       - /app/apps/api/dist
     depends_on:
       db:
@@ -50,9 +49,8 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      # Monta todo el monorepo
       - ../:/app
-      # Evita sobrescribir node_modules y cache
+
       - /app/node_modules
       - /app/apps/web/node_modules
       - /app/apps/web/.next

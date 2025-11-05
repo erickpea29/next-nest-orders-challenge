@@ -1,0 +1,238 @@
+name: Cypress E2E Tests
+
+# Trigger the workflow on push to main or pull requests
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  # Allow manual triggering from Actions tab
+  workflow_dispatch:
+
+jobs:
+  # Job 1: Install dependencies and cache
+  install:
+    name: Install Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Cypress installation
+        working-directory: apps/web
+        run: npx cypress verify
+
+  # Job 2: Run Cypress E2E tests
+  cypress-run:
+    name: Run Cypress E2E Tests
+    runs-on: ubuntu-latest
+    needs: install
+
+    strategy:
+      # Run tests in parallel across multiple containers
+      fail-fast: false
+      matrix:
+        # Run 3 parallel instances
+        containers: [1, 2, 3]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build API
+        working-directory: apps/api
+        run: npm run build
+
+      - name: Build Next.js app
+        working-directory: apps/web
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+
+      - name: Start API Server
+        working-directory: apps/api
+        run: |
+          npm run start:prod &
+          echo $! > api.pid
+        env:
+          PORT: 3001
+
+      - name: Start Next.js Server
+        working-directory: apps/web
+        run: |
+          npm start &
+          echo $! > web.pid
+        env:
+          PORT: 3000
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+
+      - name: Wait for servers to be ready
+        run: |
+          npx wait-on http://localhost:3001 http://localhost:3000 --timeout 60000
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: apps/web
+          browser: chrome
+          headed: false
+          record: false
+          parallel: true
+          group: 'E2E Tests'
+          spec: cypress/e2e/**/*.cy.ts
+        env:
+          CYPRESS_BASE_URL: http://localhost:3000
+          CYPRESS_API_URL: http://localhost:3001
+
+      - name: Upload Cypress screenshots (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots-${{ matrix.containers }}
+          path: apps/web/cypress/screenshots
+          if-no-files-found: ignore
+
+      - name: Upload Cypress videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos-${{ matrix.containers }}
+          path: apps/web/cypress/videos
+          if-no-files-found: ignore
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-results-${{ matrix.containers }}
+          path: apps/web/cypress/results
+          if-no-files-found: ignore
+
+      - name: Cleanup - Stop servers
+        if: always()
+        run: |
+          if [ -f apps/api/api.pid ]; then
+            kill $(cat apps/api/api.pid) || true
+          fi
+          if [ -f apps/web/web.pid ]; then
+            kill $(cat apps/web/web.pid) || true
+          fi
+
+  # Job 3: Generate HTML report from test results
+  report:
+    name: Generate Test Report
+    runs-on: ubuntu-latest
+    needs: cypress-run
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cypress-results-*
+          path: cypress-results
+          merge-multiple: true
+
+      - name: Install mochawesome dependencies
+        run: npm install -g mochawesome-merge mochawesome-report-generator
+
+      - name: Merge test results
+        run: |
+          npx mochawesome-merge "cypress-results/**/*.json" > merged-report.json
+        continue-on-error: true
+
+      - name: Generate HTML report
+        run: |
+          npx marge merged-report.json --reportDir public/cypress-report --reportTitle "Cypress E2E Test Report" --reportPageTitle "E2E Tests" --inline
+        continue-on-error: true
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-html-report
+          path: public/cypress-report
+          retention-days: 30
+
+      - name: Comment PR with test results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportExists = fs.existsSync('public/cypress-report/index.html');
+
+            const comment = reportExists
+              ? '✅ Cypress E2E tests completed! View the detailed report in the artifacts.'
+              : '⚠️ Cypress E2E tests completed but report generation failed.';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+        continue-on-error: true
+
+  # Job 4: Deploy test report to GitHub Pages (optional)
+  deploy-report:
+    name: Deploy Report to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: report
+    if: github.ref == 'refs/heads/main' && always()
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Download HTML report
+        uses: actions/download-artifact@v4
+        with:
+          name: cypress-html-report
+          path: public
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        continue-on-error: true
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+        continue-on-error: true
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        continue-on-error: true

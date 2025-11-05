@@ -1,0 +1,10 @@
+{
+  "data": {
+    "id": "new-order-123",
+    "item": "Test Product",
+    "price": 99.99,
+    "status": "NEW",
+    "createdAt": "2024-01-16T10:00:00.000Z",
+    "updatedAt": "2024-01-16T10:00:00.000Z"
+  }
+}

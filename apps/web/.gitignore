@@ -1,0 +1,40 @@
+# Cypress
+cypress/screenshots
+cypress/videos
+cypress/results
+cypress/reports
+cypress-report
+cypress.env.json
+
+# Next.js
+.next
+out
+*.log
+
+# Dependencies
+node_modules
+
+# Environment
+.env
+.env.local
+.env.production.local
+.env.development.local
+
+# Build
+dist
+build
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage
+.nyc_output

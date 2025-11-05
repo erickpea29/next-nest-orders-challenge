@@ -1,0 +1,95 @@
+name: Cypress E2E Tests (Mocked API)
+
+# This workflow runs Cypress tests with mocked API responses
+# Faster execution, suitable for quick feedback on frontend changes
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'apps/web/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'apps/web/**'
+  workflow_dispatch:
+
+jobs:
+  cypress-mocked:
+    name: Cypress E2E (Mocked)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js app
+        working-directory: apps/web
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+
+      - name: Start Next.js Server
+        working-directory: apps/web
+        run: npm start &
+        env:
+          PORT: 3000
+
+      - name: Wait for Next.js to be ready
+        run: npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Run Cypress tests (mocked)
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: apps/web
+          browser: chrome
+          headed: false
+          spec: cypress/e2e/**/*.cy.ts
+        env:
+          CYPRESS_BASE_URL: http://localhost:3000
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots-mocked
+          path: apps/web/cypress/screenshots
+          if-no-files-found: ignore
+
+      - name: Upload videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos-mocked
+          path: apps/web/cypress/videos
+          if-no-files-found: ignore
+
+      - name: Generate HTML report
+        if: always()
+        working-directory: apps/web
+        run: |
+          npm install -g mochawesome-merge mochawesome-report-generator
+          npx mochawesome-merge "cypress/results/**/*.json" > merged-report.json || true
+          npx marge merged-report.json --reportDir cypress-report --inline || true
+        continue-on-error: true
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-report-mocked
+          path: apps/web/cypress-report
+          if-no-files-found: ignore
