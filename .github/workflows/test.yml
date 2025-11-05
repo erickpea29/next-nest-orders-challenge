@@ -1,0 +1,111 @@
+name: API Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/api/**'
+      - '.github/workflows/test.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'apps/api/**'
+      - '.github/workflows/test.yml'
+
+jobs:
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test -- --coverage --ci --maxWorkers=2
+        working-directory: apps/api
+
+      - name: Verify coverage thresholds
+        run: |
+          echo "Checking coverage thresholds..."
+          if [ -f apps/api/coverage/coverage-summary.json ]; then
+            node -e "
+              const coverage = require('./apps/api/coverage/coverage-summary.json');
+              const total = coverage.total;
+              const threshold = 70;
+              let failed = false;
+
+              ['lines', 'statements', 'functions', 'branches'].forEach(metric => {
+                const pct = total[metric].pct;
+                console.log(\`\${metric.padEnd(12)}: \${pct}%\`);
+                if (pct < threshold) {
+                  console.error(\`❌ \${metric} coverage \${pct}% is below threshold \${threshold}%\`);
+                  failed = true;
+                }
+              });
+
+              if (failed) {
+                process.exit(1);
+              } else {
+                console.log('\\n✅ All coverage thresholds met!');
+              }
+            "
+          else
+            echo "❌ Coverage summary not found"
+            exit 1
+          fi
+
+      - name: Upload coverage to Codecov
+        if: matrix.node-version == '20.x'
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./apps/api/coverage/lcov.info
+          flags: unittests
+          name: api-coverage
+          fail_ci_if_error: false
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request' && matrix.node-version == '20.x'
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        with:
+          lcov-file: ./apps/api/coverage/lcov.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          delete-old-comments: true
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report-node-${{ matrix.node-version }}
+          path: apps/api/coverage/
+          retention-days: 7
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+
+    steps:
+      - name: Check test results
+        run: |
+          if [ "${{ needs.test.result }}" == "success" ]; then
+            echo "✅ All tests passed successfully!"
+            exit 0
+          else
+            echo "❌ Tests failed"
+            exit 1
+          fi
