@@ -24,9 +24,9 @@ export function Button({
 }: ButtonProps) {
   return (
     <StyledButton
-      variant={variant}
-      size={size}
-      fullWidth={fullWidth}
+      $variant={variant}
+      $size={size}
+      $fullWidth={fullWidth}
       disabled={disabled || loading}
       {...props}
     >

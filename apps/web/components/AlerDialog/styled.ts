@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
-export const Overlay = styled.div<{ isOpen: boolean }>`
-  display: ${(props) => (props.isOpen ? "flex" : "none")};
+export const Overlay = styled.div<{ $isOpen: boolean }>`
+  display: ${(props) => (props.$isOpen ? "flex" : "none")};
   position: fixed;
   top: 0;
   left: 0;
@@ -52,37 +52,4 @@ export const ButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-`;
-
-export const Button = styled.button<{ variant: "cancel" | "confirm" }>`
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  ${(props) =>
-    props.variant === "cancel"
-      ? `
-    background-color: #e5e5e5;
-    color: #666;
-
-    &:hover {
-      background-color: #d4d4d4;
-    }
-  `
-      : `
-    background-color: #2563eb;
-    color: white;
-
-    &:hover {
-      background-color: #1d4ed8;
-    }
-  `}
-
-  &:active {
-    transform: scale(0.98);
-  }
 `;

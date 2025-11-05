@@ -20,8 +20,11 @@
     "test:e2e:report": "cypress run && npx marge cypress/results/*.json -f report -o cypress/reports/html"
   },
   "dependencies": {
+    "@axe-core/react": "^4.11.0",
     "@tanstack/react-query": "^5.90.6",
     "@tanstack/react-table": "^8.21.3",
+    "axe-core": "^4.11.0",
+    "focus-trap-react": "^11.0.4",
     "lucide-react": "^0.552.0",
     "next": "14.2.15",
     "react": "^18.3.1",

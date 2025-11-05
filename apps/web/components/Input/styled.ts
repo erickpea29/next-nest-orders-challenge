@@ -58,7 +58,7 @@ export const StyledInput = styled.input<{ $hasError?: boolean }>`
 
   &:disabled {
     background: #f8fafc;
-    color: #94a3b8;
+    color: #64748b;
     cursor: not-allowed;
     border-color: #e2e8f0;
   }

@@ -13,6 +13,10 @@ const HeaderContainer = styled.header<{ $isScrolled: boolean }>`
   box-shadow: ${(props) =>
     props.$isScrolled ? "0 2px 20px rgba(0, 0, 0, 0.05)" : "none"};
   border-bottom: 1px solid rgb(242, 244, 247);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 `;
 
 const Nav = styled.nav`
@@ -28,14 +32,25 @@ const Nav = styled.nav`
   }
 `;
 
-const LogoContainer = styled.div`
+const LogoContainer = styled.a`
   cursor: pointer;
   transition: opacity 0.2s ease;
   display: flex;
   align-items: center;
+  text-decoration: none;
 
   &:hover {
     opacity: 0.8;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgb(0, 181, 107);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 `;
 

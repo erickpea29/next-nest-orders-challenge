@@ -29,14 +29,14 @@ const Value = styled.div`
 
 const Description = styled.div`
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: #64748b;
   margin-top: 0.5rem;
 `;
 
 const Trend = styled.span<{ $positive?: boolean }>`
   font-size: 0.75rem;
   font-weight: 600;
-  color: ${(props) => (props.$positive ? "#10b981" : "#ef4444")};
+  color: ${(props) => (props.$positive ? "#059669" : "#dc2626")};
   margin-left: 0.5rem;
 `;
 

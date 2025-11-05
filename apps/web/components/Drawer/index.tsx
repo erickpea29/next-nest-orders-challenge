@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import FocusTrap from "focus-trap-react";
 import {
   DrawerContainer,
   DrawerBackdrop,
@@ -32,16 +33,24 @@ export function Drawer({
 }: DrawerProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
+      previousActiveElement.current = document.activeElement as HTMLElement;
       setIsVisible(true);
 
       setTimeout(() => setIsAnimating(true), 10);
     } else {
       setIsAnimating(false);
 
-      const timer = setTimeout(() => setIsVisible(false), 600);
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+
+        if (previousActiveElement.current) {
+          previousActiveElement.current.focus();
+        }
+      }, 600);
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
@@ -80,32 +89,40 @@ export function Drawer({
   return (
     <DrawerContainer>
       <DrawerBackdrop onClick={handleBackdropClick} $isOpen={isAnimating} />
-      <DrawerContent $isOpen={isAnimating} $size={size}>
-        {(title || showCloseButton) && (
-          <DrawerHeader>
-            {title && <h2>{title}</h2>}
-            {showCloseButton && (
-              <CloseButton onClick={onClose} aria-label="Close drawer">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </CloseButton>
-            )}
-          </DrawerHeader>
-        )}
-        <DrawerBody>{children}</DrawerBody>
-        {footer && <DrawerFooter>{footer}</DrawerFooter>}
-      </DrawerContent>
+      <FocusTrap active={isOpen}>
+        <DrawerContent
+          $isOpen={isAnimating}
+          $size={size}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={title ? "drawer-title" : undefined}
+        >
+          {(title || showCloseButton) && (
+            <DrawerHeader>
+              {title && <h2 id="drawer-title">{title}</h2>}
+              {showCloseButton && (
+                <CloseButton onClick={onClose} aria-label="Close drawer">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </CloseButton>
+              )}
+            </DrawerHeader>
+          )}
+          <DrawerBody>{children}</DrawerBody>
+          {footer && <DrawerFooter>{footer}</DrawerFooter>}
+        </DrawerContent>
+      </FocusTrap>
     </DrawerContainer>
   );
 }

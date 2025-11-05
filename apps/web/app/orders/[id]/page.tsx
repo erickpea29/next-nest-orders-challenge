@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Order } from "@/types/order";
@@ -27,8 +27,7 @@ export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
   const orderId = params.id as string;
-
-  console.log(orderId);
+  const [isMounted, setIsMounted] = useState(false);
 
   const {
     data: order,
@@ -40,6 +39,16 @@ export default function OrderDetailPage() {
     queryFn: () => fetchOrder(orderId),
     enabled: !!orderId,
   });
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (order) {
+      document.title = `Order #${order.id} - ${order.item} | Orders Management`;
+    }
+  }, [order]);
 
   const handleClose = () => {
     router.push("/");
@@ -121,16 +130,39 @@ export default function OrderDetailPage() {
     );
   }
 
+  const orderStructuredData =
+    order && isMounted
+      ? {
+          "@type": "Order",
+          orderNumber: order.id,
+          orderStatus: order.status,
+          orderDate: order.createdAt,
+          acceptedOffer: {
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Product",
+              name: order.item,
+            },
+            price: order.price,
+            priceCurrency: "USD",
+          },
+        }
+      : null;
+
   return (
     <>
+      {orderStructuredData && <script type="application/ld+json" />}
+
       <Header />
-      <Container>
-        <OrderDetailsModal
-          isOpen={true}
-          onClose={handleClose}
-          order={order || null}
-        />
-      </Container>
+      <main id="main-content">
+        <Container>
+          <OrderDetailsModal
+            isOpen={true}
+            onClose={handleClose}
+            order={order || null}
+          />
+        </Container>
+      </main>
     </>
   );
 }

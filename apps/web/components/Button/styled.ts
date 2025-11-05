@@ -68,12 +68,12 @@ const variantStyles = {
   `,
   ghost: css`
     background: transparent;
-    color: #475569;
+    color: #334155;
     border: 2px solid transparent;
 
     &:hover:not(:disabled) {
       background: #ffffff;
-      color: #475569;
+      color: #1e293b;
       border-color: #e2e8f0;
     }
 
@@ -121,9 +121,9 @@ const sizeStyles = {
 };
 
 export const StyledButton = styled.button<{
-  variant: ButtonProps["variant"];
-  size: ButtonProps["size"];
-  fullWidth?: boolean;
+  $variant: ButtonProps["variant"];
+  $size: ButtonProps["size"];
+  $fullWidth?: boolean;
 }>`
   position: relative;
   display: inline-flex;
@@ -137,10 +137,10 @@ export const StyledButton = styled.button<{
   user-select: none;
   outline: none;
 
-  ${({ variant = "primary" }) => variantStyles[variant]}
-  ${({ size = "md" }) => sizeStyles[size]}
-  ${({ fullWidth }) =>
-    fullWidth &&
+  ${({ $variant = "primary" }) => variantStyles[$variant]}
+  ${({ $size = "md" }) => sizeStyles[$size]}
+  ${({ $fullWidth }) =>
+    $fullWidth &&
     css`
       width: 100%;
     `}

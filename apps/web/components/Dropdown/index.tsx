@@ -149,6 +149,7 @@ export function Dropdown({
         disabled={disabled}
         aria-haspopup="true"
         aria-expanded={isOpen}
+        aria-label={triggerLabel || "Open menu"}
       >
         {triggerIcon && <span className="icon">{triggerIcon}</span>}
         {triggerLabel && <span>{triggerLabel}</span>}

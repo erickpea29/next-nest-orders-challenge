@@ -24,13 +24,29 @@ export default function Header() {
   return (
     <>
       <HeaderContainer $isScrolled={isScrolled}>
-        <Nav>
-          <LogoContainer>
-            <LogoImage src="/images/logo.avif" alt="Logo" />
+        <Nav role="navigation" aria-label="Main navigation">
+          <LogoContainer href="/" aria-label="Orders Management - Home">
+            <LogoImage
+              src="/images/logo.avif"
+              alt="Orders Management Logo"
+              width={40}
+              height={40}
+              loading="eager"
+            />
           </LogoContainer>
-          <Button variant="secondary" size="md">
-            Ver en GitHub
-          </Button>
+          <a
+            href="https://github.com/erickpea29/next-nest-orders-challenge"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View project on GitHub (opens in new window)"
+            style={{
+              textDecoration: 'none',
+            }}
+          >
+            <Button variant="secondary" size="md">
+              Ver en GitHub
+            </Button>
+          </a>
         </Nav>
       </HeaderContainer>
       <HeaderSpacer />

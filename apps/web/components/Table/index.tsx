@@ -58,11 +58,27 @@ export function Table<T>({
   return (
     <TableWrapper>
       <StyledTable>
+        <caption
+          style={{
+            position: "absolute",
+            width: "1px",
+            height: "1px",
+            padding: 0,
+            margin: "-1px",
+            overflow: "hidden",
+            clip: "rect(0,0,0,0)",
+            whiteSpace: "nowrap",
+            borderWidth: 0,
+          }}
+        >
+          Orders list showing {table.getRowCount()} total orders
+        </caption>
+
         <Thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <Th key={header.id}>
+                <Th key={header.id} scope="col">
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -91,24 +107,28 @@ export function Table<T>({
           <PaginationButton
             onClick={() => table.firstPage()}
             disabled={!table.getCanPreviousPage()}
+            aria-label="Go to first page"
           >
             {"<<"}
           </PaginationButton>
           <PaginationButton
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            aria-label="Go to previous page"
           >
             {"<"}
           </PaginationButton>
           <PaginationButton
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            aria-label="Go to next page"
           >
             {">"}
           </PaginationButton>
           <PaginationButton
             onClick={() => table.lastPage()}
             disabled={!table.getCanNextPage()}
+            aria-label="Go to last page"
           >
             {">>"}
           </PaginationButton>
@@ -130,6 +150,7 @@ export function Table<T>({
                 const page = e.target.value ? Number(e.target.value) - 1 : 0;
                 table.setPageIndex(page);
               }}
+              aria-label="Jump to page number"
             />
           </PageInfo>
           <PageSizeSelect
@@ -137,6 +158,7 @@ export function Table<T>({
             onChange={(e) => {
               table.setPageSize(Number(e.target.value));
             }}
+            aria-label="Select number of rows per page"
           >
             {[10, 20, 30, 40, 50].map((pageSize) => (
               <option key={pageSize} value={pageSize}>
@@ -146,6 +168,24 @@ export function Table<T>({
           </PageSizeSelect>
         </PaginationControls>
       </PaginationWrapper>
+
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        style={{
+          position: "absolute",
+          left: "-10000px",
+          width: "1px",
+          height: "1px",
+          overflow: "hidden",
+        }}
+      >
+        Page {table.getState().pagination.pageIndex + 1} of{" "}
+        {table.getPageCount()}, showing {table.getRowModel().rows.length} of{" "}
+        {table.getRowCount()} rows
+      </div>
+
       <RowCount>
         Showing {table.getRowModel().rows.length.toLocaleString()} of{" "}
         {table.getRowCount().toLocaleString()} Rows

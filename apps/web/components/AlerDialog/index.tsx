@@ -23,7 +23,7 @@ export function AlertDialog({
   };
 
   return (
-    <Overlay isOpen={isOpen} onClick={handleOverlayClick}>
+    <Overlay $isOpen={isOpen} onClick={handleOverlayClick}>
       <DialogBox>
         <Title>{title}</Title>
         <Message>{message}</Message>

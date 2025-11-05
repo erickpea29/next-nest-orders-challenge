@@ -11,6 +11,17 @@ import { Drawer } from "@/components/Drawer";
 import OrderModal from "@/modules/OrderModal";
 import { StatCard } from "@/components/StatCard";
 import { OrderDetailsModal } from "@/modules/OrderDetailsModal";
+import {
+  PageHeader,
+  HeaderRow,
+  PageTitle,
+  PageDescription,
+  StatsGrid,
+  Section,
+  VisuallyHidden,
+  ErrorMessage,
+} from "./styled";
+import { TableSkeleton } from "@/components/Skeleton";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -77,99 +88,100 @@ export default function Page() {
 
   return (
     <>
+      <script type="application/ld+json" />
+
       <Header />
-      <Container>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "0.5rem",
-          }}
-        >
-          <div>
-            <h1 style={{ margin: 0 }}>Orders</h1>
-          </div>
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => setIsDrawerOpen(true)}
-          >
-            Create New Order
-          </Button>
-        </div>
-        <p style={{ marginTop: "0.5rem" }}>Manage your orders efficiently</p>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-            gap: "1.5rem",
-          }}
-        >
-          <StatCard
-            label="New Orders"
-            value={counts.new.toString()}
-            trend="+8.2%"
-            trendPositive={true}
-            description="vs last month"
-          />
-          <StatCard
-            label="Paid Orders"
-            value={counts.paid.toString()}
-            trend="+5.4%"
-            trendPositive={true}
-            description="Successfully processed"
-          />
-          <StatCard
-            label="Cancelled Orders"
-            value={counts.cancelled.toString()}
-            trend="-2.1%"
-            trendPositive={false}
-            description="vs last month"
-          />
-        </div>
-
-        {isLoading && <p>Loading orders...</p>}
-        {isError && (
-          <p style={{ color: "red" }}>Error: {(error as Error).message}</p>
-        )}
-        {!isLoading && !isError && (
-          <Table data={orders} columns={columns} initialPageSize={10} />
-        )}
-
-        <Drawer
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          title="Create New Order"
-          size="md"
-          footer={
-            <>
-              <Button
-                variant="ghost"
-                onClick={() => setIsDrawerOpen(false)}
-                disabled={orderModal.isSubmitting}
-              >
-                Cancel
-              </Button>
+      <main id="main-content">
+        <Container>
+          <PageHeader>
+            <HeaderRow>
+              <PageTitle>Orders</PageTitle>
               <Button
                 variant="primary"
-                onClick={orderModal.handleSubmit}
-                loading={orderModal.isSubmitting}
+                size="md"
+                onClick={() => setIsDrawerOpen(true)}
               >
-                Save Order
+                Create New Order
               </Button>
-            </>
-          }
-        >
-          {orderModal.form}
-        </Drawer>
+            </HeaderRow>
+            <PageDescription>Manage your orders efficiently</PageDescription>
+          </PageHeader>
 
-        <OrderDetailsModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          order={selectedOrder}
-        />
-      </Container>
+          <Section aria-labelledby="stats-heading">
+            <VisuallyHidden id="stats-heading">Order Statistics</VisuallyHidden>
+            <StatsGrid>
+              <StatCard
+                label="New Orders"
+                value={counts.new.toString()}
+                trend="+8.2%"
+                trendPositive={true}
+                description="vs last month"
+              />
+              <StatCard
+                label="Paid Orders"
+                value={counts.paid.toString()}
+                trend="+5.4%"
+                trendPositive={true}
+                description="Successfully processed"
+              />
+              <StatCard
+                label="Cancelled Orders"
+                value={counts.cancelled.toString()}
+                trend="-2.1%"
+                trendPositive={false}
+                description="vs last month"
+              />
+            </StatsGrid>
+          </Section>
+
+          <Section aria-labelledby="orders-heading">
+            <VisuallyHidden id="orders-heading">Orders List</VisuallyHidden>
+
+            {isLoading && <TableSkeleton />}
+            {isError && (
+              <ErrorMessage role="alert">
+                Error: {(error as Error).message}
+              </ErrorMessage>
+            )}
+            {!isLoading && !isError && (
+              <Table data={orders} columns={columns} initialPageSize={10} />
+            )}
+          </Section>
+
+          <Drawer
+            isOpen={isDrawerOpen}
+            onClose={() => setIsDrawerOpen(false)}
+            title="Create New Order"
+            size="md"
+            footer={
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsDrawerOpen(false)}
+                  disabled={orderModal.isSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={orderModal.handleSubmit}
+                  loading={orderModal.isSubmitting}
+                >
+                  Save Order
+                </Button>
+              </>
+            }
+          >
+            {orderModal.form}
+          </Drawer>
+
+          <OrderDetailsModal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            order={selectedOrder}
+          />
+        </Container>
+      </main>
     </>
   );
 }

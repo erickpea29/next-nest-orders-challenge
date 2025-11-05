@@ -4,9 +4,20 @@ const TableWrapper = styled.div`
   background: #fff;
   border: 1px solid rgba(255, 255, 255, 1);
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
   margin-top: 2rem;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    width: calc(100% + 3rem);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
 `;
 
 const StyledTable = styled.table`
@@ -14,6 +25,11 @@ const StyledTable = styled.table`
   border-collapse: collapse;
   font-family: system-ui, sans-serif;
   font-size: 0.875rem;
+  min-width: 600px;
+
+  @media (max-width: 768px) {
+    font-size: 0.8125rem;
+  }
 `;
 
 const Thead = styled.thead`
@@ -59,6 +75,19 @@ const Th = styled.th`
   &:last-child {
     padding-right: 1.5rem;
   }
+
+  @media (max-width: 640px) {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.6875rem;
+
+    &:first-child {
+      padding-left: 1rem;
+    }
+
+    &:last-child {
+      padding-right: 1rem;
+    }
+  }
 `;
 
 const Td = styled.td`
@@ -72,6 +101,18 @@ const Td = styled.td`
 
   &:last-child {
     padding-right: 1.5rem;
+  }
+
+  @media (max-width: 640px) {
+    padding: 0.75rem 0.75rem;
+
+    &:first-child {
+      padding-left: 1rem;
+    }
+
+    &:last-child {
+      padding-right: 1rem;
+    }
   }
 `;
 
@@ -102,6 +143,11 @@ const PaginationWrapper = styled.div`
   padding: 1rem 0rem;
   border-top: 1px solid rgb(242, 244, 247);
   background: #fff;
+
+  @media (max-width: 768px) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 `;
 
 const PaginationControls = styled.div`
@@ -110,6 +156,11 @@ const PaginationControls = styled.div`
   justify-content: flex-end;
   gap: 0.5rem;
   flex-wrap: wrap;
+
+  @media (max-width: 640px) {
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+  }
 `;
 
 const PaginationButton = styled.button`
@@ -121,6 +172,8 @@ const PaginationButton = styled.button`
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.15s ease;
+  min-width: 44px;
+  min-height: 44px;
 
   &:hover:not(:disabled) {
     background: #f8fafc;
@@ -135,6 +188,17 @@ const PaginationButton = styled.button`
   &:active:not(:disabled) {
     transform: scale(0.98);
   }
+
+  @media (max-width: 640px) {
+    padding: 0.375rem 0.5rem;
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 0.8125rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 `;
 
 const PageInfo = styled.span`
@@ -148,6 +212,11 @@ const PageInfo = styled.span`
   strong {
     color: #0f172a;
     font-weight: 600;
+  }
+
+  @media (max-width: 640px) {
+    font-size: 0.8125rem;
+    margin-left: 0.25rem;
   }
 `;
 
@@ -164,6 +233,16 @@ const PageInput = styled.input`
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  @media (max-width: 640px) {
+    width: 3.5rem;
+    padding: 0.375rem;
+    font-size: 0.8125rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 `;
 
@@ -186,6 +265,15 @@ const PageSizeSelect = styled.select`
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
+
+  @media (max-width: 640px) {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 `;
 
 const RowCount = styled.div`
@@ -195,6 +283,11 @@ const RowCount = styled.div`
   background: #f8fafc;
   border-top: 1px solid rgb(242, 244, 247);
   text-align: right;
+
+  @media (max-width: 640px) {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
 `;
 
 export {

@@ -2,8 +2,22 @@
 
 import { QueryProvider } from "./QueryProvider";
 import { Toaster } from "react-hot-toast";
+import React from "react";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
+  React.useEffect(() => {
+    if (
+      process.env.NODE_ENV === "development" &&
+      typeof window !== "undefined"
+    ) {
+      import("@axe-core/react")
+        .then((axe) => {
+          axe.default(React, window.document, 1000);
+        })
+        .catch(() => {});
+    }
+  }, []);
+
   return (
     <>
       <QueryProvider>{children}</QueryProvider> <ToasterProvider />
