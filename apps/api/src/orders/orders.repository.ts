@@ -6,7 +6,7 @@ import { Order } from "./order.entity";
 export class OrdersRepository {
   repo = AppDataSource.getRepository(Order);
 
-  async list(page = 1, size = 10, q?: string) {
+  async list(page = 1, size = 1000, q?: string) {
     const skip = (page - 1) * size;
     const qb = this.repo.createQueryBuilder("o").orderBy("o.createdAt", "DESC");
     if (q) {

@@ -27,7 +27,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 async function fetchOrders(): Promise<Order[]> {
-  const res = await fetch(`${API}/orders`);
+  const res = await fetch(`${API}/orders?size=1000`);
   if (!res.ok) throw new Error("Failed to fetch orders");
   const data = await res.json();
   return data.data;
